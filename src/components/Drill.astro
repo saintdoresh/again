@@ -13,7 +13,7 @@ const spec = JSON.stringify(drill).replace(/</g, '\\u003c');
   <div class="practice">
     <h2>Practice</h2>
     <p>{drill.practice.prompt}</p>
-    <p class="hint">The right version is above. Try this broken one first, before you scroll back.</p>
+    <p class="hint">Fix this piece, then check. Two hints sit above if the correct code is still closed.</p>
     <textarea class="editor short" spellcheck="false" autocomplete="off" aria-label="Practice">{drill.practice.starter}</textarea>
     <div class="drill-actions">
       <button type="button" class="pill" data-check>Check this</button>
@@ -21,9 +21,9 @@ const spec = JSON.stringify(drill).replace(/</g, '\\u003c');
     </div>
     <div class="result" data-result hidden></div>
     <div class="drill-actions">
-      <button type="button" class="pill" data-start>Start the assessment</button>
+      <button type="button" class="pill" data-start disabled>Start the assessment</button>
     </div>
-    <p class="hint">The lesson closes until both answers are right. You cannot open it early.</p>
+    <p class="hint" data-gate>Pass this code first. The assessment opens when the check says it is right.</p>
   </div>
 
   <div class="assessment">
@@ -111,7 +111,22 @@ const spec = JSON.stringify(drill).replace(/</g, '\\u003c');
       root.querySelector<HTMLElement>('.assessment h2')?.focus();
     }
 
-    root.querySelector<HTMLButtonElement>('[data-start]')?.addEventListener('click', closeLesson);
+    function setGate(open: boolean) {
+      const start = root.querySelector<HTMLButtonElement>('[data-start]');
+      const gate = root.querySelector<HTMLElement>('[data-gate]');
+      if (start) start.disabled = !open;
+      if (gate) {
+        gate.textContent = open
+          ? 'The code is right. You can start the assessment. The lesson closes until both answers are right.'
+          : 'Pass this code first. The assessment opens when the check says it is right.';
+      }
+    }
+
+    root.querySelector<HTMLButtonElement>('[data-start]')?.addEventListener('click', () => {
+      const start = root.querySelector<HTMLButtonElement>('[data-start]');
+      if (start?.disabled) return;
+      closeLesson();
+    });
     const editor = root.querySelector('textarea');
     const check = root.querySelector<HTMLButtonElement>('[data-check]');
     const reset = root.querySelector<HTMLButtonElement>('[data-reset]');
@@ -122,6 +137,7 @@ const spec = JSON.stringify(drill).replace(/</g, '\\u003c');
       const written = editor.value;
       if (!written.trim()) {
         const miss = drill.practice.empty;
+        setGate(false);
         show(result, 'is-wrong', [
           ['Why.', miss.why],
           ['Do this.', miss.do],
@@ -130,11 +146,13 @@ const spec = JSON.stringify(drill).replace(/</g, '\\u003c');
       } else {
         const gap = firstMiss(drill.practice.rules, written);
         if (!gap) {
+          setGate(true);
           show(result, 'is-right', [
             ["That's the mark.", drill.practice.pass.why],
             ['Remember.', drill.practice.pass.remember],
           ]);
         } else {
+          setGate(false);
           const more = gap.later === 1 ? '1 more piece comes after this.' : gap.later > 1 ? `${gap.later} more pieces come after this.` : undefined;
           show(result, 'is-wrong', [
             ['Why.', gap.miss.why],
@@ -146,12 +164,15 @@ const spec = JSON.stringify(drill).replace(/</g, '\\u003c');
       check.textContent = 'Check again';
     });
 
+    editor.addEventListener('input', () => setGate(false));
+
     reset.addEventListener('click', () => {
       if (editor.value !== drill.practice.starter && !window.confirm('Put the broken version back? Your edits in this box will go.')) return;
       editor.value = drill.practice.starter;
       result.hidden = true;
       result.replaceChildren();
       check.textContent = 'Check this';
+      setGate(false);
       editor.focus();
     });
 

@@ -3,6 +3,7 @@ import Again from './Again.astro';
 import Drill from './Drill.astro';
 import Preview from './Preview.astro';
 import { drills } from '../data/drills';
+import { firstMiss } from '../scripts/drill';
 import type { Step } from '../data/types';
 
 interface Link { href: string; title: string }
@@ -18,10 +19,14 @@ const { step, index, total, trail, prev, next } = Astro.props;
 const track = trail.href.includes('/exam') ? 'exam' : 'profile';
 const drill = drills[`${track}:${step.slug}`];
 const lockKey = `again-lock-${track}-${step.slug}`;
+const hintKey = `again-hints-${track}-${step.slug}`;
+const gap = drill ? firstMiss(drill.practice.rules, drill.practice.starter) : null;
+const hints = gap ? [gap.miss.remember, gap.miss.do] : [];
 ---
-<script is:inline define:vars={{ lockKey }}>
+<script is:inline define:vars={{ lockKey, hintKey }}>
   try {
     if (localStorage.getItem(lockKey) === 'open') document.documentElement.classList.add('is-assessing');
+    if (localStorage.getItem(hintKey) === '2') document.documentElement.classList.add('is-code-open');
   } catch (error) {}
 </script>
 <div class="backrow">
@@ -47,6 +52,15 @@ const lockKey = `again-lock-${track}-${step.slug}`;
   <Again tellings={step.tellings} />
 </div>
 
+{(step.html || step.css) && hints.length === 2 && (
+  <div class="code-lock" data-hints={hintKey}>
+    <h2>The correct code</h2>
+    <div data-hint-list></div>
+    <p class="hint" data-hint-status>Closed. Two hints, then it opens.</p>
+    <button type="button" class="pill" data-hint>Hint</button>
+  </div>
+)}
+<div class="answers">
 {step.html && (
   <>
     <h2>The labels</h2>
@@ -59,6 +73,7 @@ const lockKey = `again-lock-${track}-${step.slug}`;
     <pre class="code"><code>{step.css.trim()}</code></pre>
   </>
 )}
+</div>
 
 <h2>Line by line</h2>
 <ol class="says">
@@ -94,6 +109,44 @@ const lockKey = `again-lock-${track}-${step.slug}`;
   {next && <a class="next" href={next.href}>{next.title}</a>}
 </nav>
 
+<script define:vars={{ hintKey, hints }}>
+  const lock = document.querySelector('[data-hints]');
+  const button = lock?.querySelector('[data-hint]');
+  const list = lock?.querySelector('[data-hint-list]');
+  const status = lock?.querySelector('[data-hint-status]');
+  if (lock && button instanceof HTMLButtonElement && list && status && Array.isArray(hints)) {
+    let count = Number(localStorage.getItem(hintKey) || '0');
+    if (!Number.isFinite(count) || count < 0) count = 0;
+
+    const paint = () => {
+      list.replaceChildren();
+      for (let index = 0; index < Math.min(count, 2); index += 1) {
+        const row = document.createElement('p');
+        const label = document.createElement('strong');
+        label.textContent = `Hint ${index + 1}.`;
+        row.append(label, document.createTextNode(` ${hints[index]}`));
+        list.append(row);
+      }
+      if (count >= 2) {
+        localStorage.setItem(hintKey, '2');
+        document.documentElement.classList.add('is-code-open');
+        status.textContent = 'The correct code is open.';
+        return;
+      }
+      status.textContent = count === 0
+        ? 'Closed. Two hints, then the correct code opens.'
+        : 'One hint left. Then the correct code opens.';
+      button.textContent = count === 0 ? 'Hint' : 'Second hint';
+    };
+
+    button.addEventListener('click', () => {
+      count += 1;
+      localStorage.setItem(hintKey, String(count));
+      paint();
+    });
+    paint();
+  }
+</script>
 <script define:vars={{ slug: step.slug, trail: trail.href }}>
   const key = trail.includes('/exam') ? 'again-seen-exam' : 'again-seen-profile';
   const seen = JSON.parse(localStorage.getItem(key) || '[]');

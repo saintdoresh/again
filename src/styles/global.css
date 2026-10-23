@@ -137,6 +137,12 @@ a { color: inherit; }
   text-decoration: none;
 }
 .pill:hover { background: var(--clay); }
+.pill:disabled,
+.pill:disabled:hover {
+  background: var(--line);
+  color: var(--muted);
+  cursor: not-allowed;
+}
 .pill:active { transform: scale(0.98); }
 .texty { height: 44px; padding: 0 2px; font-size: 15px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
 .texty:hover { color: var(--ink); }
@@ -325,6 +331,12 @@ a { color: inherit; }
 .checks .ok .mark { color: var(--leaf); }
 .checks .yet .mark { color: var(--line); }
 .checks .fix { background: var(--warn); border-radius: 12px; padding: 8px; margin: 4px 0; }
+html:not(.is-code-open) .answers,
+html:not(.is-code-open) .says code { display: none; }
+html.is-code-open .code-lock { display: none; }
+.code-lock { margin-top: 8px; }
+[data-hint-list] p { margin: 0 0 8px; }
+
 html.is-assessing .lesson,
 html.is-assessing .practice,
 html.is-assessing .turn,
