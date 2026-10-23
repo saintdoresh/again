@@ -17,12 +17,19 @@ interface Props {
 const { step, index, total, trail, prev, next } = Astro.props;
 const track = trail.href.includes('/exam') ? 'exam' : 'profile';
 const drill = drills[`${track}:${step.slug}`];
+const lockKey = `again-lock-${track}-${step.slug}`;
 ---
+<script is:inline define:vars={{ lockKey }}>
+  try {
+    if (localStorage.getItem(lockKey) === 'open') document.documentElement.classList.add('is-assessing');
+  } catch (error) {}
+</script>
 <div class="backrow">
   <a class="back" href={trail.href}>{trail.label}</a>
   <p class="where">{index + 1} of {total}</p>
 </div>
 <h1>{step.title}</h1>
+<div class="lesson">
 {step.brief && (
   <figure class="brief">
     <blockquote>{step.brief}</blockquote>
@@ -78,8 +85,9 @@ const drill = drills[`${track}:${step.slug}`];
 {step.slug === 'marker' && (
   <p><a href="/try">Type your own page on this phone.</a></p>
 )}
+</div>
 
-{drill && <Drill drill={drill} id={`${track}-${step.slug}`} />}
+{drill && <Drill drill={drill} id={`${track}-${step.slug}`} lockKey={lockKey} />}
 
 <nav class="turn" aria-label="Lessons">
   {prev ? <a class="prev" href={prev.href}>{prev.title}</a> : <span></span>}

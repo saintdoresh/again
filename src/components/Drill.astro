@@ -4,23 +4,31 @@ import type { Drill } from '../data/drills';
 interface Props {
   drill: Drill;
   id: string;
+  lockKey: string;
 }
-const { drill, id } = Astro.props;
+const { drill, id, lockKey } = Astro.props;
 const spec = JSON.stringify(drill).replace(/</g, '\\u003c');
 ---
-<section class="drill" data-drill={id}>
-  <h2>Practice</h2>
-  <p>{drill.practice.prompt}</p>
-  <p class="hint">The right version is above. Try this broken one first, before you scroll back.</p>
-  <textarea class="editor short" spellcheck="false" autocomplete="off" aria-label="Practice">{drill.practice.starter}</textarea>
-  <div class="drill-actions">
-    <button type="button" class="pill" data-check>Check this</button>
-    <button type="button" class="texty" data-reset>Put the broken one back</button>
+<section class="drill" data-drill={id} data-lock={lockKey}>
+  <div class="practice">
+    <h2>Practice</h2>
+    <p>{drill.practice.prompt}</p>
+    <p class="hint">The right version is above. Try this broken one first, before you scroll back.</p>
+    <textarea class="editor short" spellcheck="false" autocomplete="off" aria-label="Practice">{drill.practice.starter}</textarea>
+    <div class="drill-actions">
+      <button type="button" class="pill" data-check>Check this</button>
+      <button type="button" class="texty" data-reset>Put the broken one back</button>
+    </div>
+    <div class="result" data-result hidden></div>
+    <div class="drill-actions">
+      <button type="button" class="pill" data-start>Start the assessment</button>
+    </div>
+    <p class="hint">The lesson closes until both answers are right. You cannot open it early.</p>
   </div>
-  <div class="result" data-result hidden></div>
 
-  <h2>Assessment</h2>
-  <p>Two questions. Pick one answer each, then mark it. A wrong answer tells you why, what to do, and what to remember. Change it and mark again.</p>
+  <div class="assessment">
+  <h2 tabindex="-1">Assessment</h2>
+  <p>The lesson is closed. Pick one answer each, then mark it. A wrong answer tells you why, what to do, and what to remember. Change it and mark again.</p>
   <form data-quiz>
     {drill.questions.map((question, index) => (
       <fieldset class="q" data-q={index}>
@@ -36,6 +44,7 @@ const spec = JSON.stringify(drill).replace(/</g, '\\u003c');
     <button type="button" class="pill" data-mark>Mark this</button>
   </form>
   <div class="result" data-quiz-result hidden></div>
+  </div>
   <script type="application/json" data-spec set:html={spec}></script>
 </section>
 
@@ -74,6 +83,35 @@ const spec = JSON.stringify(drill).replace(/</g, '\\u003c');
     const rawSpec = root.querySelector('[data-spec]')?.textContent;
     if (!rawSpec) return;
     const drill = JSON.parse(rawSpec) as Drill;
+    const lockKey = root.dataset.lock || '';
+    const stored = lockKey ? localStorage.getItem(lockKey) : null;
+    if (stored === 'open') document.documentElement.classList.add('is-assessing');
+    if (stored === 'done') {
+      root.classList.add('is-done');
+      const intro = root.querySelector<HTMLElement>('.assessment > p');
+      if (intro) intro.textContent = 'You finished this one. The lesson is open.';
+    }
+
+    function closeLesson() {
+      if (lockKey) localStorage.setItem(lockKey, 'open');
+      document.documentElement.classList.add('is-assessing');
+      root.classList.remove('is-done');
+      root.querySelectorAll<HTMLInputElement>('.choice input').forEach((input) => {
+        input.checked = false;
+      });
+      root.querySelectorAll('.choice').forEach((choice) => choice.classList.remove('is-right', 'is-wrong'));
+      const quizResult = root.querySelector<HTMLElement>('[data-quiz-result]');
+      const mark = root.querySelector<HTMLButtonElement>('[data-mark]');
+      if (quizResult) {
+        quizResult.hidden = true;
+        quizResult.replaceChildren();
+      }
+      if (mark) mark.textContent = 'Mark this';
+      window.scrollTo(0, 0);
+      root.querySelector<HTMLElement>('.assessment h2')?.focus();
+    }
+
+    root.querySelector<HTMLButtonElement>('[data-start]')?.addEventListener('click', closeLesson);
     const editor = root.querySelector('textarea');
     const check = root.querySelector<HTMLButtonElement>('[data-check]');
     const reset = root.querySelector<HTMLButtonElement>('[data-reset]');
@@ -156,8 +194,13 @@ const spec = JSON.stringify(drill).replace(/</g, '\\u003c');
 
       if (!wrong) {
         const remembers = drill.questions.map((question) => question.choices.find((choice) => choice.right)?.remember).filter((text): text is string => Boolean(text));
+        if (lockKey) localStorage.setItem(lockKey, 'done');
+        document.documentElement.classList.remove('is-assessing');
+        root.classList.add('is-done');
+        const intro = root.querySelector<HTMLElement>('.assessment > p');
+        if (intro) intro.textContent = 'You finished this one. The lesson is open.';
         show(quizResult, 'is-right', [
-          ["That's the mark.", 'Both answers match this lesson.'],
+          ["That's the mark.", 'Both answers match this lesson. The lesson is open again.'],
           ...remembers.map((text) => ['Remember.', text] as [string, string]),
         ]);
       } else {

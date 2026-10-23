@@ -9,4 +9,4 @@ npm run dev
 
 The terminal prints a Network address. On the same Wi-Fi, open that address on her phone.
 
-Start at the profile. The exam site comes after. Each lesson ends with a practice, one broken piece to fix, then two questions. A miss says why, what to do, and what to remember. Colours are paper `#FAF7F2`, ink `#1A1712`, and clay `#C0532E`.
+Start at the profile. The exam site comes after. Each lesson ends with a practice, one broken piece to fix, then an assessment. The lesson closes until both answers are right. A miss says why, what to do, and what to remember. Colours are paper `#FAF7F2`, ink `#1A1712`, and clay `#C0532E`.

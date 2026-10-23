@@ -325,6 +325,14 @@ a { color: inherit; }
 .checks .ok .mark { color: var(--leaf); }
 .checks .yet .mark { color: var(--line); }
 .checks .fix { background: var(--warn); border-radius: 12px; padding: 8px; margin: 4px 0; }
+html.is-assessing .lesson,
+html.is-assessing .practice,
+html.is-assessing .turn,
+html.is-assessing .colours-link { display: none; }
+.assessment { display: none; }
+html.is-assessing .assessment,
+.drill.is-done .assessment { display: block; }
+
 .editor.short { min-height: 168px; }
 .hint { color: var(--muted); font-size: 16px; }
 .drill-actions {
