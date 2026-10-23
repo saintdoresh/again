@@ -1,0 +1,50 @@
+---
+// Three tellings of one point. The button cycles them. Show all three keeps every wording on the page.
+interface Props { tellings: [string, string, string] }
+const { tellings } = Astro.props;
+const headings = ['In plain words', 'On the page', 'What gets the mark'];
+---
+<div class="again" data-again-root>
+  <div data-again-text aria-live="polite">
+    {tellings.map((text, i) => (
+      <div class="telling" data-telling hidden={i !== 0}>
+        <h2>{headings[i]}</h2>
+        <p>{text}</p>
+      </div>
+    ))}
+  </div>
+  <div class="again-bar">
+    <button type="button" class="pill" data-again>Say it again</button>
+    <span class="count" data-count>1 of 3</span>
+    <button type="button" class="texty" data-all>Show all three</button>
+  </div>
+</div>
+<script>
+  document.querySelectorAll('[data-again-root]').forEach((root) => {
+    const panels = [...root.querySelectorAll<HTMLElement>('[data-telling]')];
+    const again = root.querySelector<HTMLButtonElement>('[data-again]');
+    const all = root.querySelector<HTMLButtonElement>('[data-all]');
+    const count = root.querySelector<HTMLElement>('[data-count]');
+    let index = 0;
+    let expanded = false;
+
+    const paint = () => {
+      panels.forEach((panel, n) => {
+        panel.hidden = expanded ? false : n !== index;
+      });
+      if (count) count.textContent = expanded ? 'All three' : `${index + 1} of ${panels.length}`;
+      if (all) all.textContent = expanded ? 'Show one at a time' : 'Show all three';
+      if (again) again.hidden = expanded;
+    };
+
+    again?.addEventListener('click', () => {
+      index = (index + 1) % panels.length;
+      paint();
+    });
+    all?.addEventListener('click', () => {
+      expanded = !expanded;
+      paint();
+    });
+    paint();
+  });
+</script>

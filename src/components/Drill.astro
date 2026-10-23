@@ -1,0 +1,176 @@
+---
+import type { Drill } from '../data/drills';
+
+interface Props {
+  drill: Drill;
+  id: string;
+}
+const { drill, id } = Astro.props;
+const spec = JSON.stringify(drill).replace(/</g, '\\u003c');
+---
+<section class="drill" data-drill={id}>
+  <h2>Practice</h2>
+  <p>{drill.practice.prompt}</p>
+  <p class="hint">The right version is above. Try this broken one first, before you scroll back.</p>
+  <textarea class="editor short" spellcheck="false" autocomplete="off" aria-label="Practice">{drill.practice.starter}</textarea>
+  <div class="drill-actions">
+    <button type="button" class="pill" data-check>Check this</button>
+    <button type="button" class="texty" data-reset>Put the broken one back</button>
+  </div>
+  <div class="result" data-result hidden></div>
+
+  <h2>Assessment</h2>
+  <p>Two questions. Pick one answer each, then mark it. A wrong answer tells you why, what to do, and what to remember. Change it and mark again.</p>
+  <form data-quiz>
+    {drill.questions.map((question, index) => (
+      <fieldset class="q" data-q={index}>
+        <legend>{question.ask}</legend>
+        {question.choices.map((choice, choiceIndex) => (
+          <label class="choice">
+            <input type="radio" name={`${id}-q${index}`} value={String(choiceIndex)} />
+            <span>{choice.text}</span>
+          </label>
+        ))}
+      </fieldset>
+    ))}
+    <button type="button" class="pill" data-mark>Mark this</button>
+  </form>
+  <div class="result" data-quiz-result hidden></div>
+  <script type="application/json" data-spec set:html={spec}></script>
+</section>
+
+<script>
+  import { firstMiss } from '../scripts/drill';
+  import type { Drill } from '../data/drills';
+
+  function line(label: string, text: string) {
+    const p = document.createElement('p');
+    const strong = document.createElement('strong');
+    strong.textContent = label;
+    p.append(strong, document.createTextNode(' ' + text));
+    if (label === 'Remember.') p.className = 'remember';
+    return p;
+  }
+
+  function show(slot: HTMLElement, tone: 'is-right' | 'is-wrong', parts: [string, string][], extra?: string) {
+    slot.hidden = false;
+    slot.replaceChildren();
+    const box = document.createElement('div');
+    box.className = `note ${tone}`;
+    box.setAttribute('role', 'status');
+    parts.forEach(([label, text]) => box.append(line(label, text)));
+    if (extra) {
+      const later = document.createElement('p');
+      later.className = 'later';
+      later.textContent = extra;
+      box.append(later);
+    }
+    slot.append(box);
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    slot.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-drill]').forEach((root) => {
+    const rawSpec = root.querySelector('[data-spec]')?.textContent;
+    if (!rawSpec) return;
+    const drill = JSON.parse(rawSpec) as Drill;
+    const editor = root.querySelector('textarea');
+    const check = root.querySelector<HTMLButtonElement>('[data-check]');
+    const reset = root.querySelector<HTMLButtonElement>('[data-reset]');
+    const result = root.querySelector<HTMLElement>('[data-result]');
+    if (!editor || !check || !reset || !result) return;
+
+    check.addEventListener('click', () => {
+      const written = editor.value;
+      if (!written.trim()) {
+        const miss = drill.practice.empty;
+        show(result, 'is-wrong', [
+          ['Why.', miss.why],
+          ['Do this.', miss.do],
+          ['Remember.', miss.remember],
+        ]);
+      } else {
+        const gap = firstMiss(drill.practice.rules, written);
+        if (!gap) {
+          show(result, 'is-right', [
+            ["That's the mark.", drill.practice.pass.why],
+            ['Remember.', drill.practice.pass.remember],
+          ]);
+        } else {
+          const more = gap.later === 1 ? '1 more piece comes after this.' : gap.later > 1 ? `${gap.later} more pieces come after this.` : undefined;
+          show(result, 'is-wrong', [
+            ['Why.', gap.miss.why],
+            ['Do this.', gap.miss.do],
+            ['Remember.', gap.miss.remember],
+          ], more);
+        }
+      }
+      check.textContent = 'Check again';
+    });
+
+    reset.addEventListener('click', () => {
+      if (editor.value !== drill.practice.starter && !window.confirm('Put the broken version back? Your edits in this box will go.')) return;
+      editor.value = drill.practice.starter;
+      result.hidden = true;
+      result.replaceChildren();
+      check.textContent = 'Check this';
+      editor.focus();
+    });
+
+    const mark = root.querySelector<HTMLButtonElement>('[data-mark]');
+    const quizResult = root.querySelector<HTMLElement>('[data-quiz-result]');
+    if (!mark || !quizResult) return;
+
+    root.querySelectorAll<HTMLInputElement>('.choice input').forEach((input) => {
+      input.addEventListener('change', () => {
+        input.closest('.choice')?.classList.remove('is-right', 'is-wrong');
+      });
+    });
+
+    mark.addEventListener('click', () => {
+      const choices = root.querySelectorAll<HTMLLabelElement>('.choice');
+      choices.forEach((choice) => choice.classList.remove('is-right', 'is-wrong'));
+
+      const picked = drill.questions.map((question, index) => {
+        const selected = root.querySelector<HTMLInputElement>(`input[name="${root.dataset.drill}-q${index}"]:checked`);
+        return selected ? { question, index: Number(selected.value), choice: selected.closest('.choice') } : null;
+      });
+
+      if (picked.some((item) => !item)) {
+        show(quizResult, 'is-wrong', [
+          ['Why.', 'A blank question cannot be marked.'],
+          ['Do this.', 'Pick one answer on each question, then mark again.'],
+          ['Remember.', 'Both questions, then the button.'],
+        ]);
+        mark.textContent = 'Mark again';
+        return;
+      }
+
+      const wrong = picked.find((item) => item && !item.question.choices[item.index]?.right);
+      picked.forEach((item) => {
+        if (!item?.choice) return;
+        const correct = item.question.choices[item.index]?.right;
+        if (correct) item.choice.classList.add('is-right');
+        else if (item === wrong) item.choice.classList.add('is-wrong');
+      });
+
+      if (!wrong) {
+        const remembers = drill.questions.map((question) => question.choices.find((choice) => choice.right)?.remember).filter((text): text is string => Boolean(text));
+        show(quizResult, 'is-right', [
+          ["That's the mark.", 'Both answers match this lesson.'],
+          ...remembers.map((text) => ['Remember.', text] as [string, string]),
+        ]);
+      } else {
+        const choice = wrong.question.choices[wrong.index];
+        const rest = picked.filter((item) => item && !item.question.choices[item.index]?.right).length - 1;
+        const more = rest === 1 ? '1 more question comes after this.' : rest > 1 ? `${rest} more questions come after this.` : undefined;
+        show(quizResult, 'is-wrong', [
+          ['Why.', choice.why],
+          ['Do this.', choice.do],
+          ['Remember.', choice.remember],
+        ], more);
+      }
+      mark.textContent = 'Mark again';
+    });
+  });
+</script>

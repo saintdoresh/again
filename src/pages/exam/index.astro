@@ -1,0 +1,26 @@
+---
+import Base from '../../layouts/Base.astro';
+import { examSteps } from '../../data/exam';
+---
+<Base title="The exam" current="exam">
+  <h1>The exam paper</h1>
+  <p class="lede">A five-page site for Contact Marketing Services Ltd. The pages are linked. The paint is one separate file. Do the profile first if the labels are still new.</p>
+  <p><a class="pill" href="/exam/pages">Start with the five pages</a></p>
+  <p class="caption">The finished example is plain HTML, in its own folder. <a href="/study/cmsl/index.html">Open the site</a> and use the menu.</p>
+  <ol class="lessons">
+    {examSteps.map((step) => (
+      <li>
+        <a data-slug={step.slug} href={`/exam/${step.slug}`}>
+          <strong>{step.title}</strong>
+          <span>{step.summary}</span>
+        </a>
+      </li>
+    ))}
+  </ol>
+</Base>
+<script>
+  const seen = JSON.parse(localStorage.getItem('again-seen-exam') || '[]') as string[];
+  document.querySelectorAll<HTMLAnchorElement>('[data-slug]').forEach((link) => {
+    if (seen.includes(link.dataset.slug || '')) link.classList.add('seen');
+  });
+</script>

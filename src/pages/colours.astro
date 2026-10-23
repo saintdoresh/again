@@ -1,0 +1,41 @@
+---
+import Base from '../layouts/Base.astro';
+import { swatches } from '../data/palette';
+---
+<Base title="The colours">
+  <h1>Paper, ink, and clay.</h1>
+  <p class="lede">Use this set. You do not need to invent colours. The brief asks for jobs, not for a rainbow: a dark header with light text, a menu that is a different bar, an about box that is not the page colour, and three skill boxes that match.</p>
+
+  <ul class="swatches">
+    {swatches.map((swatch) => (
+      <li>
+        <span class="chip" style={`background:${swatch.hex};color:${swatch.on}`}>{swatch.name}</span>
+        <code>{swatch.hex}</code>
+        <p>{swatch.job}</p>
+      </li>
+    ))}
+  </ul>
+
+  <h2>Why these sit together</h2>
+  <p>Ink and paper are a printed page: dark type, warm ground, flipped for the header so the text contrasts. Clay is the one strong colour. It appears three times, the line under the header, the first skill border, and the button. Used everywhere, it would stop pointing at anything.</p>
+  <p>The page background is paper, <code>#faf7f2</code>. About and Contact are white. That gap is what “a different background” means. If both are white, the mark disappears. The skill boxes share one shape and take three quiet fills: clay wash, leaf green, sky blue. Same padding, different colour.</p>
+  <p>A bright blue header with a yellow menu is the usual first try. It can be read, and it looks unfinished. This set is the one to submit.</p>
+
+  <h2>Where each one goes</h2>
+  <pre class="code"><code>{`header background     #1a1712   ink
+header text           #faf7f2   paper
+header bottom border  #c0532e   clay
+page background       #faf7f2   paper
+menu background       #f4ede6   ghost
+menu text             #1a1712   ink
+menu border           #e4d9ce   line
+about background      #ffffff   white
+about border          #e4d9ce   line
+graphic design box    #f8e8e1   border #c0532e
+web design box        #e7f5ee   border #14613a
+photography box       #e8eef6   border #1e4a73
+send button           #c0532e   text #faf7f2
+footer background     #1a1712   text #faf7f2`}</code></pre>
+  <p>The font on the page you submit is Arial. The school computer already has it. This desk uses a different typeface so the lessons are comfortable to read. Do not link a font from the internet in the assignment. The lab may be offline.</p>
+  <p><a class="pill" href="/profile/colours">Read the colour lesson</a></p>
+</Base>

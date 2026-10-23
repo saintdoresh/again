@@ -1,0 +1,20 @@
+{
+  "name": "again",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Phone practice desk for Advanced Web Page Design. Plain HTML and CSS, explained again.",
+  "scripts": {
+    "dev": "astro dev --host",
+    "build": "astro build",
+    "preview": "astro preview --host",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource/instrument-serif": "^5.3.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.4.1",
+    "tailwindcss": "^4.3.3"
+  }
+}

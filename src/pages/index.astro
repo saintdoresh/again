@@ -1,0 +1,37 @@
+---
+import Base from '../layouts/Base.astro';
+import Again from '../components/Again.astro';
+
+const tellings = [
+  'This is a practice desk for Advanced Web Page Design. You read one small piece. Then you type it. The profile comes first, because that is the first project. The exam site comes after, when the labels feel familiar.',
+  'Say it again keeps the same point and changes the words. Show all three leaves every wording on the screen, for when you want to read it over. The clay spark is only the mark of this desk. The pages you submit use plain HTML and a separate CSS file.',
+  'The colours are already chosen: paper, ink, and clay. You do not have to invent a palette. Use that set on the profile and on the exam site. Change the sentences into your own words before you submit. Leave the labels as they are taught here.',
+] as [string, string, string];
+---
+<Base current="home">
+  <h1>Read it again.</h1>
+  <p class="lede">A phone desk for the web page course. You are starting from the first label. That is the right place.</p>
+  <Again tellings={tellings} />
+
+  <label class="name-field">
+    <span>Your name, for the practice page</span>
+    <input id="learner-name" name="name" autocomplete="name" placeholder="Your name" />
+  </label>
+  <p class="caption">Saved on this phone only. The practice page uses it. The lessons still say Your Name until you change the example.</p>
+
+  <ol class="lessons">
+    <li><a href="/profile"><strong>The profile</strong><span>The first project. Start here, with what a tag is.</span></a></li>
+    <li><a href="/exam"><strong>The exam</strong><span>Five pages, a form, a table, and pictures that are links. After the profile.</span></a></li>
+    <li><a href="/colours"><strong>The colours</strong><span>Paper, ink, and clay. The set to use on both.</span></a></li>
+    <li><a href="/try"><strong>Try it</strong><span>Type the profile on this phone and check it.</span></a></li>
+  </ol>
+</Base>
+<script>
+  const input = document.querySelector<HTMLInputElement>('#learner-name');
+  if (input) {
+    input.value = localStorage.getItem('again-name') || '';
+    input.addEventListener('input', () => {
+      localStorage.setItem('again-name', input.value.trim());
+    });
+  }
+</script>

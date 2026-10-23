@@ -1,0 +1,38 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Try it" current="try">
+  <h1>Try it</h1>
+  <p class="lede">This is the profile, typed on the phone. Copy one piece from a lesson into the writing or the paint, then check. Do the first line that is not ticked. Then check again.</p>
+
+  <iframe id="preview" class="frame short" title="Your page"></iframe>
+
+  <ul class="checks" id="checks" aria-live="polite"></ul>
+
+  <div class="checkbar">
+    <button type="button" class="pill" id="check">Check the page</button>
+    <button type="button" class="texty" id="reset">Put the starter back</button>
+  </div>
+
+  <div class="switcher" role="tablist" aria-label="Files">
+    <button type="button" id="tab-html" role="tab" aria-selected="true" aria-controls="panel-html">Writing</button>
+    <button type="button" id="tab-css" role="tab" aria-selected="false" aria-controls="panel-css">Paint</button>
+  </div>
+
+  <div id="panel-html" role="tabpanel" aria-labelledby="tab-html">
+    <label>
+      <span class="caption">index.html</span>
+      <textarea id="html" class="editor" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+    </label>
+  </div>
+  <div id="panel-css" role="tabpanel" aria-labelledby="tab-css" hidden>
+    <label>
+      <span class="caption">yourname.css</span>
+      <textarea id="css" class="editor" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+    </label>
+  </div>
+</Base>
+<script>
+  import { mount } from '../scripts/practice';
+  mount();
+</script>

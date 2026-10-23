@@ -1,0 +1,68 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "arial",
+        "createdAt": "2026-10-23T10:20:12.667Z",
+        "reason": "The HTML she submits names Arial so it still paints on an offline school computer. The desk UI uses Inter and Instrument Serif."
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          "public/study/profile/index.html"
+        ],
+        "createdAt": "2026-10-23T10:21:46.076Z",
+        "reason": "Paper #FAF7F2 is the portfolio colour the brief asked for, and the lesson needs a paper page so a white about box reads as a different background."
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          "public/study/cmsl/index.html"
+        ],
+        "createdAt": "2026-10-23T10:21:46.092Z",
+        "reason": "Paper #FAF7F2 is the portfolio colour the brief asked for, and the lesson needs a paper page so a white about box reads as a different background."
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          "public/study/cmsl/about.html"
+        ],
+        "createdAt": "2026-10-23T10:21:46.107Z",
+        "reason": "Paper #FAF7F2 is the portfolio colour the brief asked for, and the lesson needs a paper page so a white about box reads as a different background."
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          "public/study/cmsl/services.html"
+        ],
+        "createdAt": "2026-10-23T10:21:46.121Z",
+        "reason": "Paper #FAF7F2 is the portfolio colour the brief asked for, and the lesson needs a paper page so a white about box reads as a different background."
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          "public/study/cmsl/clients.html"
+        ],
+        "createdAt": "2026-10-23T10:21:46.136Z",
+        "reason": "Paper #FAF7F2 is the portfolio colour the brief asked for, and the lesson needs a paper page so a white about box reads as a different background."
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          "public/study/cmsl/contact.html"
+        ],
+        "createdAt": "2026-10-23T10:21:46.150Z",
+        "reason": "Paper #FAF7F2 is the portfolio colour the brief asked for, and the lesson needs a paper page so a white about box reads as a different background."
+      }
+    ]
+  }
+}

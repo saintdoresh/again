@@ -1,0 +1,38 @@
+---
+import Base from '../../layouts/Base.astro';
+import Lesson from '../../components/Lesson.astro';
+import { examSteps } from '../../data/exam';
+import type { Step } from '../../data/types';
+
+export function getStaticPaths() {
+  return examSteps.map((step, index) => ({
+    params: { slug: step.slug },
+    props: {
+      step,
+      index,
+      total: examSteps.length,
+      prev: index > 0 ? { href: `/exam/${examSteps[index - 1].slug}`, title: examSteps[index - 1].title } : null,
+      next: index < examSteps.length - 1 ? { href: `/exam/${examSteps[index + 1].slug}`, title: examSteps[index + 1].title } : null,
+    },
+  }));
+}
+
+interface Props {
+  step: Step;
+  index: number;
+  total: number;
+  prev: { href: string; title: string } | null;
+  next: { href: string; title: string } | null;
+}
+const { step, index, total, prev, next } = Astro.props;
+---
+<Base title={step.title} current="exam">
+  <Lesson
+    step={step}
+    index={index}
+    total={total}
+    prev={prev}
+    next={next}
+    trail={{ href: '/exam', label: 'The exam' }}
+  />
+</Base>

@@ -1,0 +1,96 @@
+---
+import Again from './Again.astro';
+import Drill from './Drill.astro';
+import Preview from './Preview.astro';
+import { drills } from '../data/drills';
+import type { Step } from '../data/types';
+
+interface Link { href: string; title: string }
+interface Props {
+  step: Step;
+  index: number;
+  total: number;
+  trail: { href: string; label: string };
+  prev: Link | null;
+  next: Link | null;
+}
+const { step, index, total, trail, prev, next } = Astro.props;
+const track = trail.href.includes('/exam') ? 'exam' : 'profile';
+const drill = drills[`${track}:${step.slug}`];
+---
+<div class="backrow">
+  <a class="back" href={trail.href}>{trail.label}</a>
+  <p class="where">{index + 1} of {total}</p>
+</div>
+<h1>{step.title}</h1>
+{step.brief && (
+  <figure class="brief">
+    <blockquote>{step.brief}</blockquote>
+    <figcaption>{step.briefFrom}</figcaption>
+  </figure>
+)}
+
+<h2>Look here</h2>
+<Preview preview={step.preview} />
+{step.preview.kind === 'page' && step.preview.src.includes('#') && (
+  <p class="caption">The clay outline is the part this lesson is about.</p>
+)}
+
+<div class="after-look">
+  <Again tellings={step.tellings} />
+</div>
+
+{step.html && (
+  <>
+    <h2>The labels</h2>
+    <pre class="code"><code>{step.html.trim()}</code></pre>
+  </>
+)}
+{step.css && (
+  <>
+    <h2>The paint</h2>
+    <pre class="code"><code>{step.css.trim()}</code></pre>
+  </>
+)}
+
+<h2>Line by line</h2>
+<ol class="says">
+  {step.lines.map((line) => (
+    <li>
+      <code>{line.code}</code>
+      <span>{line.says}</span>
+    </li>
+  ))}
+</ol>
+
+{step.friend && (
+  <div class="friend">
+    <h2>A friend wrote this</h2>
+    <p>This is not your file, and it is not the version to copy. It is here so you can see the difference after the right labels.</p>
+    <pre class="code"><code>{step.friend.code.trim()}</code></pre>
+    <p>{step.friend.why}</p>
+  </div>
+)}
+
+{step.slug === 'colours' && (
+  <p><a href="/colours">See every colour, and the job it does.</a></p>
+)}
+{step.slug === 'marker' && (
+  <p><a href="/try">Type your own page on this phone.</a></p>
+)}
+
+{drill && <Drill drill={drill} id={`${track}-${step.slug}`} />}
+
+<nav class="turn" aria-label="Lessons">
+  {prev ? <a class="prev" href={prev.href}>{prev.title}</a> : <span></span>}
+  {next && <a class="next" href={next.href}>{next.title}</a>}
+</nav>
+
+<script define:vars={{ slug: step.slug, trail: trail.href }}>
+  const key = trail.includes('/exam') ? 'again-seen-exam' : 'again-seen-profile';
+  const seen = JSON.parse(localStorage.getItem(key) || '[]');
+  if (!seen.includes(slug)) {
+    seen.push(slug);
+    localStorage.setItem(key, JSON.stringify(seen));
+  }
+</script>

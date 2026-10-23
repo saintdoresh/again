@@ -1,0 +1,24 @@
+---
+import Icon from './Icon.astro';
+import type { IconName } from '../lib/icons';
+
+interface Props { current?: 'home' | 'profile' | 'exam' | 'try' }
+const { current } = Astro.props;
+
+const stops: { key: Props['current']; href: string; label: string; icon: IconName }[] = [
+  { key: 'home', href: '/', label: 'Home', icon: 'spark' },
+  { key: 'profile', href: '/profile', label: 'Profile', icon: 'seat' },
+  { key: 'exam', href: '/exam', label: 'Exam', icon: 'doc' },
+  { key: 'try', href: '/try', label: 'Try', icon: 'pencil' },
+];
+---
+<nav class="dock" aria-label="Practice">
+  <div class="dock-bar">
+    {stops.map((stop) => (
+      <a href={stop.href} aria-current={current === stop.key ? 'page' : undefined}>
+        <Icon name={stop.icon} size={16} />
+        <span>{stop.label}</span>
+      </a>
+    ))}
+  </div>
+</nav>

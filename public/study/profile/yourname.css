@@ -1,0 +1,157 @@
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 18px;
+  line-height: 1.5;
+  background: #faf7f2;
+  color: #1a1712;
+}
+
+header {
+  background: #1a1712;
+  color: #faf7f2;
+  text-align: center;
+  padding: 48px 20px;
+  border-bottom: 4px solid #c0532e;
+}
+
+header h1 {
+  margin: 0 0 8px;
+  font-size: 36px;
+}
+
+header p {
+  margin: 0;
+  font-size: 18px;
+}
+
+nav {
+  background: #f4ede6;
+  padding: 12px;
+  text-align: center;
+}
+
+nav a {
+  display: inline-block;
+  color: #1a1712;
+  text-decoration: none;
+  background: #ffffff;
+  border: 1px solid #e4d9ce;
+  padding: 10px 14px;
+  margin: 6px;
+}
+
+.about {
+  background: #ffffff;
+  border: 1px solid #e4d9ce;
+  padding: 20px;
+  margin: 20px;
+}
+
+.about h2,
+.skills h2,
+.contact h2 {
+  margin-top: 0;
+  font-size: 28px;
+}
+
+.about p {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.skills {
+  margin: 20px;
+}
+
+.skill {
+  display: inline-block;
+  width: 260px;
+  max-width: calc(100% - 16px);
+  box-sizing: border-box;
+  vertical-align: top;
+  margin: 8px;
+  padding: 16px;
+  border: 1px solid #c0532e;
+  background: #f8e8e1;
+  color: #8c3a1e;
+}
+
+.skill h3 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.skill p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.skill.web {
+  border-color: #14613a;
+  background: #e7f5ee;
+  color: #14613a;
+}
+
+.skill.photo {
+  border-color: #1e4a73;
+  background: #e8eef6;
+  color: #1e4a73;
+}
+
+.contact {
+  background: #ffffff;
+  border: 1px solid #e4d9ce;
+  margin: 20px;
+  padding: 20px;
+}
+
+.contact label {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.contact input {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  box-sizing: border-box;
+  margin-top: 6px;
+  padding: 10px;
+  border: 1px solid #e4d9ce;
+  font: inherit;
+  font-size: 16px;
+}
+
+.contact button {
+  background: #c0532e;
+  color: #faf7f2;
+  border: 0;
+  padding: 12px 18px;
+  font: inherit;
+  font-size: 16px;
+}
+
+footer {
+  background: #1a1712;
+  color: #faf7f2;
+  text-align: center;
+  padding: 20px;
+}
+
+footer p {
+  margin: 0;
+}
+
+:target {
+  box-shadow: inset 0 0 0 3px #c0532e;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid #c0532e;
+  outline-offset: 2px;
+}

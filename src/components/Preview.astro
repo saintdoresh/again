@@ -1,0 +1,37 @@
+---
+import type { Preview } from '../data/types';
+interface Props { preview: Preview }
+const { preview } = Astro.props;
+---
+{preview.kind === 'tag' && (
+  <p class="tag-demo">
+    <span class="punc">&lt;</span><span>p</span><span class="punc">&gt;</span><span class="word">Hello</span><span class="punc">&lt;/</span><span>p</span><span class="punc">&gt;</span>
+  </p>
+)}
+{preview.kind === 'files' && (
+  <div class="files">
+    <div class="file-sheet"><span>index.html</span><em>the writing</em></div>
+    <div class="file-sheet"><span>yourname.css</span><em>the paint</em></div>
+  </div>
+)}
+{preview.kind === 'skeleton' && (
+  <div class="skel">
+    <p><code>head</code> The title, and the link to the paint. A visitor does not see the head.</p>
+    <p><code>body</code> The header, the menu, the sections, the footer. A visitor sees all of this.</p>
+  </div>
+)}
+{preview.kind === 'page' && (
+  <iframe class="frame" title={preview.title} src={preview.src.split('#')[0]} data-point={preview.src.split('#')[1] ?? ''}></iframe>
+)}
+<script>
+  // Highlight inside the frame. A hash on the frame src scrolls the lesson itself and hides the title.
+  document.querySelectorAll('iframe.frame').forEach((frame) => {
+    if (!(frame instanceof HTMLIFrameElement)) return;
+    frame.addEventListener('load', () => {
+      const id = frame.dataset.point;
+      const el = id ? frame.contentDocument?.getElementById(id) : null;
+      if (el) el.style.boxShadow = 'inset 0 0 0 3px #c0532e';
+      window.scrollTo(0, 0);
+    });
+  });
+</script>

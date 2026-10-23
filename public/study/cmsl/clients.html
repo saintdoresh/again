@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Our Clients · Contact Marketing Services Ltd</title>
+  <link rel="stylesheet" href="company.css">
+</head>
+<body>
+  <header>
+    <h1>Contact Marketing Services Ltd</h1>
+    <p>Marketing for businesses that want to be found.</p>
+  </header>
+  <nav id="menu">
+    <a href="index.html">Home</a>
+    <a href="about.html">About Us</a>
+    <a href="services.html">Our Services</a>
+    <a class="here" href="clients.html">Our Clients</a>
+    <a href="contact.html">Contact Us</a>
+  </nav>
+  <main>
+    <h2>Client form</h2>
+    <form action="#form" id="form">
+      <label>First name <input type="text" name="firstname"></label>
+      <label>Middle name <input type="text" name="middlename"></label>
+      <label>Surname <input type="text" name="surname"></label>
+
+      <fieldset>
+        <legend>Gender</legend>
+        <label><input type="checkbox" name="gender" value="male"> Male</label>
+        <label><input type="checkbox" name="gender" value="female"> Female</label>
+      </fieldset>
+
+      <label>Date of birth <input type="date" name="dob"></label>
+
+      <label>State of origin
+        <select name="state">
+          <option value="">South East states</option>
+          <option>Abia</option>
+          <option>Anambra</option>
+          <option>Ebonyi</option>
+          <option>Enugu</option>
+          <option>Imo</option>
+        </select>
+      </label>
+
+      <fieldset>
+        <legend>Qualification</legend>
+        <label><input type="radio" name="qualification" value="nd-nce"> ND/NCE</label>
+        <label><input type="radio" name="qualification" value="hnd-bsc"> HND/B.Sc.</label>
+        <label><input type="radio" name="qualification" value="mba-msc"> MBA/M.Sc.</label>
+        <label><input type="radio" name="qualification" value="phd"> PhD</label>
+      </fieldset>
+
+      <label>Passport <input type="file" name="passport" accept="image/*"></label>
+
+      <label>Description
+        <textarea name="description" rows="5"></textarea>
+      </label>
+
+      <button type="reset">Cancel</button>
+      <button type="submit">Submit</button>
+    </form>
+  </main>
+  <footer>
+    <p>© 2026 Contact Marketing Services Ltd</p>
+  </footer>
+</body>
+</html>
