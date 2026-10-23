@@ -1,4 +1,4 @@
-/** The set she submits with. Same inks as the portfolio, same quiet green as Urcrib, used as a student page. */
+/** The set to submit. Same inks as the portfolio, same quiet green as Urcrib, used as a student page. */
 export type Swatch = {
   name: string;
   hex: string;

@@ -7,7 +7,7 @@
         "rule": "overused-font",
         "value": "arial",
         "createdAt": "2026-10-23T10:20:12.667Z",
-        "reason": "The HTML she submits names Arial so it still paints on an offline school computer. The desk UI uses Inter and Instrument Serif."
+        "reason": "The submitted HTML names Arial so it still paints on an offline school computer. The desk UI uses Inter and Instrument Serif."
       },
       {
         "rule": "cream-palette",
