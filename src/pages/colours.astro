@@ -9,8 +9,8 @@ import { swatches } from '../data/palette';
   <ul class="swatches">
     {swatches.map((swatch) => (
       <li>
-        <span class="chip" style={`background:${swatch.hex};color:${swatch.on}`}>{swatch.name}</span>
-        <code>{swatch.hex}</code>
+        <span class="chip" style={`background:${swatch.hex}`} aria-hidden="true"></span>
+        <span class="swatch-name">{swatch.name} <code>{swatch.hex}</code></span>
         <p>{swatch.job}</p>
       </li>
     ))}

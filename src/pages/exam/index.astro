@@ -6,7 +6,6 @@ import { examSteps } from '../../data/exam';
   <h1>The exam paper</h1>
   <p class="lede">A five-page site for Contact Marketing Services Ltd. The pages are linked. The paint is one separate file. Do the profile first if the labels are still new.</p>
   <p><a class="pill" href="/exam/pages">Start with the five pages</a></p>
-  <p class="caption">The finished example is plain HTML, in its own folder. <a href="/study/cmsl/index.html">Open the site</a> and use the menu.</p>
   <ol class="lessons">
     {examSteps.map((step) => (
       <li>
@@ -17,6 +16,7 @@ import { examSteps } from '../../data/exam';
       </li>
     ))}
   </ol>
+  <p class="caption">The finished example is plain HTML, in its own folder. <a href="/study/cmsl/index.html">Open the site</a> and use the menu.</p>
 </Base>
 <script>
   const seen = JSON.parse(localStorage.getItem('again-seen-exam') || '[]') as string[];

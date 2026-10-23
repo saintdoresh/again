@@ -13,18 +13,18 @@ const tellings = [
   <p class="lede">A phone desk for the web page course. You are starting from the first label. That is the right place.</p>
   <Again tellings={tellings} />
 
-  <label class="name-field">
-    <span>Your name, for the practice page</span>
-    <input id="learner-name" name="name" autocomplete="name" placeholder="Your name" />
-  </label>
-  <p class="caption">Saved on this phone only. The practice page uses it. The lessons still say Your Name until you change the example.</p>
-
   <ol class="lessons">
     <li><a href="/profile"><strong>The profile</strong><span>The first project. Start here, with what a tag is.</span></a></li>
     <li><a href="/exam"><strong>The exam</strong><span>Five pages, a form, a table, and pictures that are links. After the profile.</span></a></li>
     <li><a href="/colours"><strong>The colours</strong><span>Paper, ink, and clay. The set to use on both.</span></a></li>
     <li><a href="/try"><strong>Try it</strong><span>Type the profile on this phone and check it.</span></a></li>
   </ol>
+
+  <label class="name-field">
+    <span>Your name, for the practice page</span>
+    <input id="learner-name" name="name" autocomplete="name" placeholder="Your name" />
+  </label>
+  <p class="caption">Saved on this phone only. The practice page uses it. The lessons still say Your Name until you change the example.</p>
 </Base>
 <script>
   const input = document.querySelector<HTMLInputElement>('#learner-name');

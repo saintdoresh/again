@@ -15,8 +15,10 @@ const headings = ['In plain words', 'On the page', 'What gets the mark'];
   </div>
   <div class="again-bar">
     <button type="button" class="pill" data-again>Say it again</button>
-    <span class="count" data-count>1 of 3</span>
-    <button type="button" class="texty" data-all>Show all three</button>
+    <div class="again-meta">
+      <span class="count" data-count>1 of 3</span>
+      <button type="button" class="texty" data-all>Show all three</button>
+    </div>
   </div>
 </div>
 <script>
@@ -35,6 +37,7 @@ const headings = ['In plain words', 'On the page', 'What gets the mark'];
       if (count) count.textContent = expanded ? 'All three' : `${index + 1} of ${panels.length}`;
       if (all) all.textContent = expanded ? 'Show one at a time' : 'Show all three';
       if (again) again.hidden = expanded;
+      root.classList.toggle('is-open', expanded);
     };
 
     again?.addEventListener('click', () => {

@@ -16,7 +16,7 @@ const stops: { key: Props['current']; href: string; label: string; icon: IconNam
   <div class="dock-bar">
     {stops.map((stop) => (
       <a href={stop.href} aria-current={current === stop.key ? 'page' : undefined}>
-        <Icon name={stop.icon} size={16} />
+        <Icon name={stop.icon} size={20} />
         <span>{stop.label}</span>
       </a>
     ))}

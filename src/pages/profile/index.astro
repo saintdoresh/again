@@ -6,7 +6,6 @@ import { profileSteps } from '../../data/profile';
   <h1>The personal profile</h1>
   <p class="lede">The brief asks for a header, a menu, an about section, three skill boxes, a contact section, and a footer. The paint goes in a separate file. You learn the labels first, then each band of the page.</p>
   <p><a class="pill" href="/profile/tag">Start with a tag</a></p>
-  <p class="caption">The finished example is a real HTML file, the kind you will submit. <a href="/study/profile/index.html">Open it</a>.</p>
   <ol class="lessons">
     {profileSteps.map((step) => (
       <li>
@@ -17,6 +16,7 @@ import { profileSteps } from '../../data/profile';
       </li>
     ))}
   </ol>
+  <p class="caption">The finished example is a real HTML file, the kind you will submit. <a href="/study/profile/index.html">Open it</a>.</p>
 </Base>
 <script>
   const seen = JSON.parse(localStorage.getItem('again-seen-profile') || '[]') as string[];
