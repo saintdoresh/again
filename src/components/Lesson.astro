@@ -21,8 +21,11 @@ const stageKey = `again-stage-${track}-${step.slug}`;
 const failKey = `again-fails-${track}-${step.slug}`;
 const returnKey = `again-return-${track}-${step.slug}`;
 const oldLock = `again-lock-${track}-${step.slug}`;
+const prevSlug = prev ? prev.href.split('/').pop() : '';
+const prevStageKey = prevSlug ? `again-stage-${track}-${prevSlug}` : '';
+const prevOld = prevSlug ? `again-lock-${track}-${prevSlug}` : '';
 ---
-<script is:inline define:vars={{ stageKey, returnKey, oldLock }}>
+<script is:inline define:vars={{ stageKey, returnKey, oldLock, prevStageKey, prevOld }}>
   try {
     let stage = localStorage.getItem(stageKey);
     if (!stage) {
@@ -32,6 +35,11 @@ const oldLock = `again-lock-${track}-${step.slug}`;
     if (stage !== 'practice' && stage !== 'assess' && stage !== 'done') stage = 'lesson';
     document.documentElement.dataset.stage = stage;
     if (localStorage.getItem(returnKey) === '1') document.documentElement.dataset.returned = '1';
+    if (prevStageKey) {
+      let earlier = localStorage.getItem(prevStageKey);
+      if (earlier !== 'done' && localStorage.getItem(prevOld) === 'done') earlier = 'done';
+      if (earlier !== 'done') document.documentElement.dataset.locked = '1';
+    }
   } catch (error) {}
 </script>
 <div class="backrow">
@@ -39,6 +47,12 @@ const oldLock = `again-lock-${track}-${step.slug}`;
   <p class="where">{index + 1} of {total}</p>
 </div>
 <h1>{step.title}</h1>
+{prev && (
+  <div data-gate>
+    <p>This lesson is closed. Finish the one before it. Do the practice. Pass the assessment. Then this one opens.</p>
+    <p><a class="pill" href={prev.href}>Go to {prev.title}</a></p>
+  </div>
+)}
 <div class="lesson" data-stage-panel="lesson">
 <div class="note is-wrong" data-return>
   <p><strong>Back to the lesson.</strong> Three tries are used. Read this again, then try the code.</p>
@@ -106,6 +120,7 @@ const oldLock = `again-lock-${track}-${step.slug}`;
     <button type="button" class="pill" data-try>Try practice</button>
   </div>
 )}
+{next && <p class="hint" data-next-wait>The next lesson opens after you practice and pass the assessment.</p>}
 </div>
 
 {drill && (
@@ -124,10 +139,14 @@ const oldLock = `again-lock-${track}-${step.slug}`;
 </nav>
 
 <script define:vars={{ slug: step.slug, trail: trail.href }}>
-  const key = trail.includes('/exam') ? 'again-seen-exam' : 'again-seen-profile';
-  const seen = JSON.parse(localStorage.getItem(key) || '[]');
-  if (!seen.includes(slug)) {
-    seen.push(slug);
-    localStorage.setItem(key, JSON.stringify(seen));
+  if (document.documentElement.dataset.locked === '1') {
+    /* A closed lesson is not read yet. */
+  } else {
+    const key = trail.includes('/exam') ? 'again-seen-exam' : 'again-seen-profile';
+    const seen = JSON.parse(localStorage.getItem(key) || '[]');
+    if (!seen.includes(slug)) {
+      seen.push(slug);
+      localStorage.setItem(key, JSON.stringify(seen));
+    }
   }
 </script>

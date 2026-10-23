@@ -20,7 +20,17 @@ import { examSteps } from '../../data/exam';
 </Base>
 <script>
   const seen = JSON.parse(localStorage.getItem('again-seen-exam') || '[]') as string[];
-  document.querySelectorAll<HTMLAnchorElement>('[data-slug]').forEach((link) => {
-    if (seen.includes(link.dataset.slug || '')) link.classList.add('seen');
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-slug]')];
+  links.forEach((link, index) => {
+    const slug = link.dataset.slug || '';
+    if (seen.includes(slug)) link.classList.add('seen');
+    if (index === 0) return;
+    const earlier = links[index - 1].dataset.slug || '';
+    const stage = localStorage.getItem(`again-stage-exam-${earlier}`);
+    const old = localStorage.getItem(`again-lock-exam-${earlier}`);
+    if (stage === 'done' || old === 'done') return;
+    link.classList.add('is-locked');
+    link.removeAttribute('href');
+    link.setAttribute('aria-disabled', 'true');
   });
 </script>
