@@ -331,19 +331,20 @@ a { color: inherit; }
 .checks .ok .mark { color: var(--leaf); }
 .checks .yet .mark { color: var(--line); }
 .checks .fix { background: var(--warn); border-radius: 12px; padding: 8px; margin: 4px 0; }
-html:not(.is-code-open) .answers,
-html:not(.is-code-open) .says code { display: none; }
-html.is-code-open .code-lock { display: none; }
-.code-lock { margin-top: 8px; }
-[data-hint-list] p { margin: 0 0 8px; }
-
-html.is-assessing .lesson,
-html.is-assessing .practice,
-html.is-assessing .turn,
-html.is-assessing .colours-link { display: none; }
-.assessment { display: none; }
-html.is-assessing .assessment,
-.drill.is-done .assessment { display: block; }
+[data-stage-panel="practice"],
+[data-stage-panel="assess"] { display: none; }
+html[data-stage="practice"] [data-stage-panel="lesson"],
+html[data-stage="assess"] [data-stage-panel="lesson"] { display: none; }
+html[data-stage="practice"] [data-stage-panel="practice"],
+html[data-stage="assess"] [data-stage-panel="assess"] { display: block; }
+html[data-stage="practice"] .turn,
+html[data-stage="assess"] .turn,
+html[data-stage="practice"] .colours-link,
+html[data-stage="assess"] .colours-link { display: none; }
+[data-return],
+[data-finished] { display: none; }
+html[data-returned] [data-return],
+html[data-stage="done"] [data-finished] { display: block; }
 
 .editor.short { min-height: 168px; }
 .hint { color: var(--muted); font-size: 16px; }

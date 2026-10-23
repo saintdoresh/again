@@ -4,49 +4,57 @@ import type { Drill } from '../data/drills';
 interface Props {
   drill: Drill;
   id: string;
-  lockKey: string;
+  stageKey: string;
+  failKey: string;
+  returnKey: string;
 }
-const { drill, id, lockKey } = Astro.props;
+const { drill, id, stageKey, failKey, returnKey } = Astro.props;
 const spec = JSON.stringify(drill).replace(/</g, '\\u003c');
 ---
-<section class="drill" data-drill={id} data-lock={lockKey}>
-  <div class="practice">
+<div
+  class="drill"
+  data-drill={id}
+  data-stage-key={stageKey}
+  data-fail-key={failKey}
+  data-return-key={returnKey}
+>
+  <section data-stage-panel="practice">
     <h2>Practice</h2>
     <p>{drill.practice.prompt}</p>
-    <p class="hint">Fix this piece, then check. Two hints sit above if the correct code is still closed.</p>
     <textarea class="editor short" spellcheck="false" autocomplete="off" aria-label="Practice">{drill.practice.starter}</textarea>
     <div class="drill-actions">
       <button type="button" class="pill" data-check>Check this</button>
       <button type="button" class="texty" data-reset>Put the broken one back</button>
     </div>
+    <p class="hint" data-tries hidden></p>
     <div class="result" data-result hidden></div>
-    <div class="drill-actions">
-      <button type="button" class="pill" data-start disabled>Start the assessment</button>
+    <div data-pass hidden>
+      <p>The code is right. Start the assessment when you are ready. The lesson stays closed until both answers are right.</p>
+      <button type="button" class="pill" data-start>Start the assessment</button>
     </div>
-    <p class="hint" data-gate>Pass this code first. The assessment opens when the check says it is right.</p>
-  </div>
+  </section>
 
-  <div class="assessment">
-  <h2 tabindex="-1">Assessment</h2>
-  <p>The lesson is closed. Pick one answer each, then mark it. A wrong answer tells you why, what to do, and what to remember. Change it and mark again.</p>
-  <form data-quiz>
-    {drill.questions.map((question, index) => (
-      <fieldset class="q" data-q={index}>
-        <legend>{question.ask}</legend>
-        {question.choices.map((choice, choiceIndex) => (
-          <label class="choice">
-            <input type="radio" name={`${id}-q${index}`} value={String(choiceIndex)} />
-            <span>{choice.text}</span>
-          </label>
-        ))}
-      </fieldset>
-    ))}
-    <button type="button" class="pill" data-mark>Mark this</button>
-  </form>
-  <div class="result" data-quiz-result hidden></div>
-  </div>
+  <section data-stage-panel="assess">
+    <h2 tabindex="-1">Assessment</h2>
+    <p>The lesson is closed. Pick one answer each, then mark it. A wrong answer tells you why, what to do, and what to remember.</p>
+    <form data-quiz>
+      {drill.questions.map((question, index) => (
+        <fieldset class="q">
+          <legend>{question.ask}</legend>
+          {question.choices.map((choice, choiceIndex) => (
+            <label class="choice">
+              <input type="radio" name={`${id}-q${index}`} value={String(choiceIndex)} />
+              <span>{choice.text}</span>
+            </label>
+          ))}
+        </fieldset>
+      ))}
+      <button type="button" class="pill" data-mark>Mark this</button>
+    </form>
+    <div class="result" data-quiz-result hidden></div>
+  </section>
   <script type="application/json" data-spec set:html={spec}></script>
-</section>
+</div>
 
 <script>
   import { firstMiss } from '../scripts/drill';
@@ -79,23 +87,134 @@ const spec = JSON.stringify(drill).replace(/</g, '\\u003c');
     slot.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
   }
 
+  function triesLeft(fails: number) {
+    const left = 3 - fails;
+    if (left === 1) return 'One try left. Then you go back to the lesson.';
+    return 'Two tries left. Then you go back to the lesson.';
+  }
+
   document.querySelectorAll<HTMLElement>('[data-drill]').forEach((root) => {
     const rawSpec = root.querySelector('[data-spec]')?.textContent;
     if (!rawSpec) return;
     const drill = JSON.parse(rawSpec) as Drill;
-    const lockKey = root.dataset.lock || '';
-    const stored = lockKey ? localStorage.getItem(lockKey) : null;
-    if (stored === 'open') document.documentElement.classList.add('is-assessing');
-    if (stored === 'done') {
-      root.classList.add('is-done');
-      const intro = root.querySelector<HTMLElement>('.assessment > p');
-      if (intro) intro.textContent = 'You finished this one. The lesson is open.';
+    const stageKey = root.dataset.stageKey || '';
+    const failKey = root.dataset.failKey || '';
+    const returnKey = root.dataset.returnKey || '';
+    const editor = root.querySelector('textarea');
+    const check = root.querySelector<HTMLButtonElement>('[data-check]');
+    const reset = root.querySelector<HTMLButtonElement>('[data-reset]');
+    const result = root.querySelector<HTMLElement>('[data-result]');
+    const tries = root.querySelector<HTMLElement>('[data-tries]');
+    const pass = root.querySelector<HTMLElement>('[data-pass]');
+    if (!editor || !check || !reset || !result || !tries || !pass) return;
+
+    let fails = Number(localStorage.getItem(failKey) || '0');
+    if (!Number.isFinite(fails) || fails < 0) fails = 0;
+
+    function setStage(stage: string) {
+      document.documentElement.dataset.stage = stage;
+      if (stageKey) localStorage.setItem(stageKey, stage);
+      window.scrollTo(0, 0);
     }
 
-    function closeLesson() {
-      if (lockKey) localStorage.setItem(lockKey, 'open');
-      document.documentElement.classList.add('is-assessing');
-      root.classList.remove('is-done');
+    function saveFails(count: number) {
+      fails = count;
+      if (failKey) localStorage.setItem(failKey, String(count));
+    }
+
+    function clearPracticeNote() {
+      result.hidden = true;
+      result.replaceChildren();
+      pass.hidden = true;
+      tries.hidden = true;
+    }
+
+    function openPractice() {
+      saveFails(0);
+      if (returnKey) localStorage.removeItem(returnKey);
+      delete document.documentElement.dataset.returned;
+      editor.value = drill.practice.starter;
+      clearPracticeNote();
+      check.textContent = 'Check this';
+      setStage('practice');
+      editor.focus();
+    }
+
+    document.querySelector<HTMLButtonElement>('[data-try]')?.addEventListener('click', openPractice);
+
+    if (document.documentElement.dataset.stage === 'practice' && fails > 0 && fails < 3) {
+      tries.hidden = false;
+      tries.textContent = triesLeft(fails);
+    }
+
+    function missOut() {
+      saveFails(fails + 1);
+      if (fails >= 3) {
+        if (returnKey) localStorage.setItem(returnKey, '1');
+        document.documentElement.dataset.returned = '1';
+        saveFails(0);
+        editor.value = drill.practice.starter;
+        clearPracticeNote();
+        check.textContent = 'Check this';
+        setStage('lesson');
+        return;
+      }
+      tries.hidden = false;
+      tries.textContent = triesLeft(fails);
+    }
+
+    check.addEventListener('click', () => {
+      const written = editor.value;
+      pass.hidden = true;
+      if (!written.trim()) {
+        const miss = drill.practice.empty;
+        missOut();
+        if (document.documentElement.dataset.stage !== 'practice') return;
+        show(result, 'is-wrong', [
+          ['Why.', miss.why],
+          ['Do this.', miss.do],
+          ['Remember.', miss.remember],
+        ]);
+      } else {
+        const gap = firstMiss(drill.practice.rules, written);
+        if (!gap) {
+          saveFails(0);
+          tries.hidden = true;
+          pass.hidden = false;
+          show(result, 'is-right', [
+            ["That's the mark.", drill.practice.pass.why],
+            ['Remember.', drill.practice.pass.remember],
+          ]);
+        } else {
+          missOut();
+          if (document.documentElement.dataset.stage !== 'practice') return;
+          const more = gap.later === 1 ? '1 more piece comes after this.' : gap.later > 1 ? `${gap.later} more pieces come after this.` : undefined;
+          show(result, 'is-wrong', [
+            ['Why.', gap.miss.why],
+            ['Do this.', gap.miss.do],
+            ['Remember.', gap.miss.remember],
+          ], more);
+        }
+      }
+      if (document.documentElement.dataset.stage === 'practice') check.textContent = 'Check again';
+    });
+
+    editor.addEventListener('input', () => {
+      pass.hidden = true;
+    });
+
+    reset.addEventListener('click', () => {
+      if (editor.value !== drill.practice.starter && !window.confirm('Put the broken version back? Your edits in this box will go.')) return;
+      editor.value = drill.practice.starter;
+      result.hidden = true;
+      result.replaceChildren();
+      pass.hidden = true;
+      check.textContent = 'Check this';
+      editor.focus();
+    });
+
+    root.querySelector<HTMLButtonElement>('[data-start]')?.addEventListener('click', () => {
+      if (pass.hidden) return;
       root.querySelectorAll<HTMLInputElement>('.choice input').forEach((input) => {
         input.checked = false;
       });
@@ -107,73 +226,8 @@ const spec = JSON.stringify(drill).replace(/</g, '\\u003c');
         quizResult.replaceChildren();
       }
       if (mark) mark.textContent = 'Mark this';
-      window.scrollTo(0, 0);
-      root.querySelector<HTMLElement>('.assessment h2')?.focus();
-    }
-
-    function setGate(open: boolean) {
-      const start = root.querySelector<HTMLButtonElement>('[data-start]');
-      const gate = root.querySelector<HTMLElement>('[data-gate]');
-      if (start) start.disabled = !open;
-      if (gate) {
-        gate.textContent = open
-          ? 'The code is right. You can start the assessment. The lesson closes until both answers are right.'
-          : 'Pass this code first. The assessment opens when the check says it is right.';
-      }
-    }
-
-    root.querySelector<HTMLButtonElement>('[data-start]')?.addEventListener('click', () => {
-      const start = root.querySelector<HTMLButtonElement>('[data-start]');
-      if (start?.disabled) return;
-      closeLesson();
-    });
-    const editor = root.querySelector('textarea');
-    const check = root.querySelector<HTMLButtonElement>('[data-check]');
-    const reset = root.querySelector<HTMLButtonElement>('[data-reset]');
-    const result = root.querySelector<HTMLElement>('[data-result]');
-    if (!editor || !check || !reset || !result) return;
-
-    check.addEventListener('click', () => {
-      const written = editor.value;
-      if (!written.trim()) {
-        const miss = drill.practice.empty;
-        setGate(false);
-        show(result, 'is-wrong', [
-          ['Why.', miss.why],
-          ['Do this.', miss.do],
-          ['Remember.', miss.remember],
-        ]);
-      } else {
-        const gap = firstMiss(drill.practice.rules, written);
-        if (!gap) {
-          setGate(true);
-          show(result, 'is-right', [
-            ["That's the mark.", drill.practice.pass.why],
-            ['Remember.', drill.practice.pass.remember],
-          ]);
-        } else {
-          setGate(false);
-          const more = gap.later === 1 ? '1 more piece comes after this.' : gap.later > 1 ? `${gap.later} more pieces come after this.` : undefined;
-          show(result, 'is-wrong', [
-            ['Why.', gap.miss.why],
-            ['Do this.', gap.miss.do],
-            ['Remember.', gap.miss.remember],
-          ], more);
-        }
-      }
-      check.textContent = 'Check again';
-    });
-
-    editor.addEventListener('input', () => setGate(false));
-
-    reset.addEventListener('click', () => {
-      if (editor.value !== drill.practice.starter && !window.confirm('Put the broken version back? Your edits in this box will go.')) return;
-      editor.value = drill.practice.starter;
-      result.hidden = true;
-      result.replaceChildren();
-      check.textContent = 'Check this';
-      setGate(false);
-      editor.focus();
+      setStage('assess');
+      root.querySelector<HTMLElement>('[data-stage-panel="assess"] h2')?.focus();
     });
 
     const mark = root.querySelector<HTMLButtonElement>('[data-mark]');
@@ -187,9 +241,7 @@ const spec = JSON.stringify(drill).replace(/</g, '\\u003c');
     });
 
     mark.addEventListener('click', () => {
-      const choices = root.querySelectorAll<HTMLLabelElement>('.choice');
-      choices.forEach((choice) => choice.classList.remove('is-right', 'is-wrong'));
-
+      root.querySelectorAll('.choice').forEach((choice) => choice.classList.remove('is-right', 'is-wrong'));
       const picked = drill.questions.map((question, index) => {
         const selected = root.querySelector<HTMLInputElement>(`input[name="${root.dataset.drill}-q${index}"]:checked`);
         return selected ? { question, index: Number(selected.value), choice: selected.closest('.choice') } : null;
@@ -208,32 +260,32 @@ const spec = JSON.stringify(drill).replace(/</g, '\\u003c');
       const wrong = picked.find((item) => item && !item.question.choices[item.index]?.right);
       picked.forEach((item) => {
         if (!item?.choice) return;
-        const correct = item.question.choices[item.index]?.right;
-        if (correct) item.choice.classList.add('is-right');
+        if (item.question.choices[item.index]?.right) item.choice.classList.add('is-right');
         else if (item === wrong) item.choice.classList.add('is-wrong');
       });
 
       if (!wrong) {
-        const remembers = drill.questions.map((question) => question.choices.find((choice) => choice.right)?.remember).filter((text): text is string => Boolean(text));
-        if (lockKey) localStorage.setItem(lockKey, 'done');
-        document.documentElement.classList.remove('is-assessing');
-        root.classList.add('is-done');
-        const intro = root.querySelector<HTMLElement>('.assessment > p');
-        if (intro) intro.textContent = 'You finished this one. The lesson is open.';
-        show(quizResult, 'is-right', [
-          ["That's the mark.", 'Both answers match this lesson. The lesson is open again.'],
-          ...remembers.map((text) => ['Remember.', text] as [string, string]),
-        ]);
-      } else {
-        const choice = wrong.question.choices[wrong.index];
-        const rest = picked.filter((item) => item && !item.question.choices[item.index]?.right).length - 1;
-        const more = rest === 1 ? '1 more question comes after this.' : rest > 1 ? `${rest} more questions come after this.` : undefined;
-        show(quizResult, 'is-wrong', [
-          ['Why.', choice.why],
-          ['Do this.', choice.do],
-          ['Remember.', choice.remember],
-        ], more);
+        const finished = document.querySelector<HTMLElement>('[data-finished]');
+        if (finished) {
+          finished.replaceChildren();
+          const remembers = drill.questions
+            .map((question) => question.choices.find((choice) => choice.right)?.remember)
+            .filter((text): text is string => Boolean(text));
+          finished.append(line("That's the mark.", 'Both answers match this lesson. It is open again.'));
+          remembers.forEach((text) => finished.append(line('Remember.', text)));
+        }
+        setStage('done');
+        return;
       }
+
+      const choice = wrong.question.choices[wrong.index];
+      const rest = picked.filter((item) => item && !item.question.choices[item.index]?.right).length - 1;
+      const more = rest === 1 ? '1 more question comes after this.' : rest > 1 ? `${rest} more questions come after this.` : undefined;
+      show(quizResult, 'is-wrong', [
+        ['Why.', choice.why],
+        ['Do this.', choice.do],
+        ['Remember.', choice.remember],
+      ], more);
       mark.textContent = 'Mark again';
     });
   });
